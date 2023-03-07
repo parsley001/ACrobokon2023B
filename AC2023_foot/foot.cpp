@@ -68,6 +68,7 @@ char data;     //シリアル通信で送られたデータ
 void send(char add, char data);//モーターを回す
 void send_all(char d_mu, char d_ms, char d_hs, char d_hu);//モーターを4つ回す
 void receive_data(void);//シリアル通信受け取り（PS3入力受け取り）
+int iswood(AnalogIn pr_left, AnalogIn pr_right);
 
 
 int main(){
@@ -93,11 +94,22 @@ int main(){
 
 //エアシリンダー（タイヤ上げ用）
         if(button_sankaku){
-            while(pr0*5>wd && pr1*5>wd){
-
+            if(iswood(pr0, pr1)){
+                air1 = 1;//前方輪上げ
+                if(iswood(pr2, pr3)){
+                    air1 = 0;
+                    air2 = 1;
+                    if (iswood(pr4, pr5)) {
+                        air2 = 0;
+                    }
+                }
             }
+
+
+
         }else {
             air1 = 0;
+            air2 = 0;
         }
 
 
@@ -191,4 +203,22 @@ void receive_data(void){
         if(data == 'd') L2 = 1;             else L2 = 0;
 
     }
+}
+
+///////////////////！！！！！！！！！！！テストしろ！！！！！！！！！///////////////////////////
+int iswood(AnalogIn pr_left, AnalogIn pr_right){
+    //R2L2同時押しでキャンセル
+    while(!(R2 && L2) && !select){
+        if((pr_right*5)<wd && (pr_left*5)<wd){//前のフォトリフレクタがどちらも検知したら
+            return 1;
+        }else if((pr_right*5)<wd){//右前だけ検知
+            send_all(stop, back, forward, stop);//前方軸に時計回り
+        }else if((pr_left*5)<wd){//左前だけ検知
+            send_all(stop, forward, back, stop);//前方軸に反時計回り
+        }else{
+            send_all(forward, forward, forward, forward);//直進
+        }
+        receive_data();
+    }//while
+    return 0;
 }
