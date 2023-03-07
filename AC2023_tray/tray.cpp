@@ -2,19 +2,22 @@
 #include "PS3.h"
 #include "mbed_wait_api.h"
 
-PS3 ps3 (PA_0, PA_1);//ps3
+
+//通信
+PS3 ps3(A0, A1);//SBDBT
+UnbufferedSerial tuusin(D8, D2, 9600);//nucleoとの通信
+
+//サーボモーター
 PwmOut servo1(D10);
 PwmOut servo2(D11);
 PwmOut servo3(D12);//こいつだけ逆向き
 
-UnbufferedSerial tuusin(PA_9, PA_10, 9600);
 
-
-
-// int Rx;            //ジョイコン　右　x軸
-// int Ry;            //ジョイコン　右　y軸
-// int Lx;            //ジョイコン　左　x軸
-// int Ly;            //ジョイコン　左　y軸
+//ボタン定義
+int Rx;            //ジョイコン　右　x軸
+int Ry;            //ジョイコン　右　y軸
+int Lx;            //ジョイコン　左　x軸
+int Ly;            //ジョイコン　左　y軸
 
 bool R1;            //R1
 bool R2;            //R2
@@ -33,7 +36,7 @@ bool button_sikaku;  // ☐
 
 bool select; //select
 bool start;  //start
-
+//
 
 
 void get_data(void);
@@ -42,6 +45,8 @@ void send_data(void);
 
 
 int main(){
+    tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits parity 1)
+
     int start=560, end=2200;//サーボPWM
     servo1.pulsewidth_us(start);//サーボ初期位置
     servo2.pulsewidth_us(start);
@@ -63,7 +68,7 @@ int main(){
             if(button_sikaku){
                 servo3.pulsewidth_us(start);
             }
-        }
+        }//if
 //トレー設置
         else{
             if(button_maru){
@@ -75,8 +80,8 @@ int main(){
             if(button_sikaku){
                 servo3.pulsewidth_us(end);
             }
-        }
-    }
+        }//else
+    }//while
     return 0;
 }
 

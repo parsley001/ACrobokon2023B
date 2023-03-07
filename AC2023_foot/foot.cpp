@@ -1,34 +1,43 @@
 #include "mbed.h"
 #include "mbed_wait_api.h"
 
+//モーター
 #define MIGI_UE 0x14
 #define MIGI_SITA 0x22
 #define HIDARI_UE 0x40
 #define HIDARI_SITA 0x30
 
 
+//12V制御
+DigitalOut sig(PC_12);//12v緊急停止
+DigitalIn  sta(PC_10);//12V検知
+DigitalOut air1(D11), air2(D12);//エア尻
+DigitalOut red(D6),green(D7),blue(D5);//LED
+
+//通信
 I2C i2c(D14,D15);//i2c通信
-DigitalOut sig(PC_10);//12v緊急停止
-DigitalOut sta(PC_12);//12V検知
-DigitalOut air1(PC_7), air2(PC_6);//エア尻
-UnbufferedSerial tuusin(PA_9, PA_10, 9600);//nucleo同士の通信
+UnbufferedSerial tuusin(D8, D2, 9600);//nucleo同士の通信
 
 //フォトリフレクタ
-DigitalIn em0(PA_0); 
-DigitalIn em1(PA_1); 
-DigitalIn em2(PA_4); 
-DigitalIn em3(PB_0); 
-DigitalIn em4(PC_0);
-DigitalIn em5(PC_1);
+AnalogIn reflector0(A0); 
+AnalogIn reflector1(A1); 
+AnalogIn reflector2(A2); 
+AnalogIn reflector3(A3); 
+AnalogIn reflector4(A4);
+AnalogIn reflector5(A5);
 
-// int Rx;            //ジョイコン　右　x軸
-// int Ry;            //ジョイコン　右　y軸
-// int Lx;            //ジョイコン　左　x軸
-// int Ly;            //ジョイコン　左　y軸
+
+//ボタン定義
+int Rx;            //ジョイコン　右　x軸
+int Ry;            //ジョイコン　右　y軸
+int Lx;            //ジョイコン　左　x軸
+int Ly;            //ジョイコン　左　y軸
+
 bool R1;            //R1
 bool R2;            //R2
 bool L1;            //L1
 bool L2;            //L2
+
 bool button_ue;     // ↑
 bool button_migi;   // →
 bool button_sita;   // ↓
@@ -41,26 +50,29 @@ bool button_sikaku;  // ☐
 
 bool select; //select
 bool start;  //start
-
-char power;//使ってない
-
-int res = 0;
-char data;
+//
 
 
+char power;  //////使ってない//////
 
-void send(char add, char data);
-void send_all(char d_mu, char d_ms, char d_hs, char d_hu);
-void receive_data(void);
+int  res = 0;  //シリアル通信を受信で１
+char data;     //シリアル通信で送られたデータ
+
+
+//プロトタイプ宣言
+void send(char add, char data);//モーターを回す
+void send_all(char d_mu, char d_ms, char d_hs, char d_hu);//モーターを4つ回す
+void receive_data(void);//シリアル通信受け取り（PS3入力受け取り）
 
 
 int main(){
-
+    tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits parity 1)
     bool moved_asimawari;////////消す予定////////
 
     while (true) {
         receive_data();//データ取得
 
+        printf("%d\n",select);
         //緊急停止
         if(select){
             sig = 1;
@@ -134,7 +146,7 @@ int main(){
 
 
 void send(char address, char data){
-    wait_us(15000);
+    wait_us(15000);//send_allに移動すべきでは？
     i2c.start();
     i2c.write(address);
     i2c.write(data);
@@ -148,9 +160,10 @@ void send_all(char d_mu, char d_ms, char d_hs, char d_hu){
     send(HIDARI_UE, d_hu);
 }
 
+//nucleoからのデータ受け取り
 void receive_data(void){
     res = tuusin.read(&data, 1);
-    printf("%c\n", data);
+    // printf("%c\n", data);
 
     if(res == 1){
         if(data == '0') select = 1;         else select = 0;
