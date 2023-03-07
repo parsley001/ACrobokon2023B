@@ -42,7 +42,7 @@ void send_data(void);
 
 
 int main(){
-    int start=550, end=2200;//サーボPWM
+    int start=560, end=2200;//サーボPWM
     servo1.pulsewidth_us(start);//サーボ初期位置
     servo2.pulsewidth_us(start);
     servo3.pulsewidth_us(start);
@@ -52,16 +52,29 @@ int main(){
         send_data();
 
 
-
+//フックを初期位置に戻す
+        if(L2 && R2){
+            if(button_maru){
+                servo2.pulsewidth_us(start);
+            }
+            if(button_batu){
+                servo1.pulsewidth_us(start);
+            }
+            if(button_sikaku){
+                servo3.pulsewidth_us(start);
+            }
+        }
 //トレー設置
-        if(button_maru){
-            servo1.pulsewidth_us(end);//サーボ位置変更
-        }
-        if(button_batu){
-            servo2.pulsewidth_us(end);
-        }
-        if(button_sikaku){
-            servo3.pulsewidth_us(end);
+        else{
+            if(button_maru){
+                servo2.pulsewidth_us(end);//サーボ位置変更
+            }
+            if(button_batu){
+                servo1.pulsewidth_us(end);
+            }
+            if(button_sikaku){
+                servo3.pulsewidth_us(end);
+            }
         }
     }
     return 0;
