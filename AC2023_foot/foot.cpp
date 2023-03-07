@@ -6,6 +6,11 @@
 #define MIGI_SITA 0x22
 #define HIDARI_UE 0x40
 #define HIDARI_SITA 0x30
+char forward = 0xa0;//正転出力パワー
+char back    = 0x60;//逆転出力パワー
+char turnr;
+char turnl;
+char stop    = 0x80;//モーター止める
 
 
 //12V制御
@@ -19,13 +24,13 @@ I2C i2c(D14,D15);//i2c通信
 UnbufferedSerial tuusin(D8, D2, 9600);//nucleo同士の通信
 
 //フォトリフレクタ
-AnalogIn reflector0(A0); 
-AnalogIn reflector1(A1); 
-AnalogIn reflector2(A2); 
-AnalogIn reflector3(A3); 
-AnalogIn reflector4(A4);
-AnalogIn reflector5(A5);
-
+AnalogIn pr0(A0); 
+AnalogIn pr1(A1); 
+AnalogIn pr2(A2); 
+AnalogIn pr3(A3); 
+AnalogIn pr4(A4);
+AnalogIn pr5(A5);
+float wd = 0.0;//Wood distance　木材検知のしきい値
 
 //ボタン定義
 int Rx;            //ジョイコン　右　x軸
@@ -66,7 +71,7 @@ void receive_data(void);//シリアル通信受け取り（PS3入力受け取り
 
 
 int main(){
-    tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits parity 1)
+    tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits, parity, stopbit)
     bool moved_asimawari;////////消す予定////////
 
     while (true) {
@@ -86,18 +91,26 @@ int main(){
         moved_asimawari = 0;
 
 
+//エアシリンダー（タイヤ上げ用）
+        if(button_sankaku){
+            while(pr0*5>wd && pr1*5>wd){
+
+            }
+        }else {
+            air1 = 0;
+        }
 
 
 //旋回
         //機体左に旋回
         if(L1 && !moved_asimawari){
-            send_all(0xa0, 0xa0, 0x60, 0x60);
+            send_all(forward, forward, back, back);
             moved_asimawari = 1;
         }
 
         //機体右に旋回
         if(R1 && !moved_asimawari){
-            send_all(0x60, 0x60, 0xa0, 0xa0);
+            send_all(back, back, forward, forward);
             moved_asimawari = 1;
         }
 
@@ -105,41 +118,34 @@ int main(){
 //移動
         //前移動
         if(button_ue && !moved_asimawari){
-            send_all(0xa0, 0xa0, 0xa0, 0xa0);
+            send_all(forward, forward, forward, forward);
             moved_asimawari = 1;
         }
 
         //右移動
         if(button_migi && !moved_asimawari){
-            send_all(0x60, 0xa0, 0x60, 0xa0);
+            send_all(back, forward, back, forward);
             moved_asimawari = 1;
         }
 
         //左移動
         if(button_hidari && !moved_asimawari){
-            send_all(0xa0, 0x60, 0xa0, 0x60);
+            send_all(forward, back, forward, back);
             moved_asimawari = 1;
         }
 
         //後移動
         if(button_sita && !moved_asimawari){
-            send_all(0x60, 0x60, 0x60, 0x60);
+            send_all(back, back, back, back);
             moved_asimawari = 1;
         }
 
 
-
-//エアシリンダー（タイヤ上げ用）
-        if(button_sankaku){
-            air1 = 1;
-        }else {
-            air1 = 0;
-        }
-
         //足回り静止
         if(!moved_asimawari){
-            send_all(0x80, 0x80, 0x80, 0x80); 
+            send_all(stop, stop, stop, stop); 
         }
+
     }//while
 }//main
 

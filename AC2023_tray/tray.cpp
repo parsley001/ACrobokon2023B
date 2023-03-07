@@ -45,7 +45,7 @@ void send_data(void);
 
 
 int main(){
-    tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits parity 1)
+    tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits, parity, stopbit)
 
     int start=560, end=2200;//サーボPWM
     servo1.pulsewidth_us(start);//サーボ初期位置
