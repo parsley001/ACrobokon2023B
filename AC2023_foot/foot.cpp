@@ -6,7 +6,7 @@
 #define MIGI_SITA 0x22
 #define HIDARI_UE 0x40
 #define HIDARI_SITA 0x30
-char forward = 0xa0;//正転出力パワー
+char _forward = 0xa0;//正転出力パワー
 char back    = 0x60;//逆転出力パワー
 char turnr;
 char turnl;
@@ -116,13 +116,13 @@ int main(){
 //旋回
         //機体左に旋回
         if(L1 && !moved_asimawari){
-            send_all(forward, forward, back, back);
+            send_all(_forward, _forward, back, back);
             moved_asimawari = 1;
         }
 
         //機体右に旋回
         if(R1 && !moved_asimawari){
-            send_all(back, back, forward, forward);
+            send_all(back, back, _forward, _forward);
             moved_asimawari = 1;
         }
 
@@ -130,19 +130,19 @@ int main(){
 //移動
         //前移動
         if(button_ue && !moved_asimawari){
-            send_all(forward, forward, forward, forward);
+            send_all(_forward, _forward, _forward, _forward);
             moved_asimawari = 1;
         }
 
         //右移動
         if(button_migi && !moved_asimawari){
-            send_all(back, forward, back, forward);
+            send_all(back, _forward, back, _forward);
             moved_asimawari = 1;
         }
 
         //左移動
         if(button_hidari && !moved_asimawari){
-            send_all(forward, back, forward, back);
+            send_all(_forward, back, _forward, back);
             moved_asimawari = 1;
         }
 
@@ -212,11 +212,11 @@ int iswood(AnalogIn pr_left, AnalogIn pr_right){
         if((pr_right*5)<wd && (pr_left*5)<wd){//前のフォトリフレクタがどちらも検知したら
             return 1;
         }else if((pr_right*5)<wd){//右前だけ検知
-            send_all(stop, back, forward, stop);//前方軸に時計回り
+            send_all(stop, back, _forward, stop);//前方軸に時計回り
         }else if((pr_left*5)<wd){//左前だけ検知
-            send_all(stop, forward, back, stop);//前方軸に反時計回り
+            send_all(stop, _forward, back, stop);//前方軸に反時計回り
         }else{
-            send_all(forward, forward, forward, forward);//直進
+            send_all(_forward, _forward, _forward, _forward);//直進
         }
         receive_data();
     }//while
