@@ -6,11 +6,11 @@
 #define MIGI_SITA 0x22
 #define HIDARI_UE 0x40
 #define HIDARI_SITA 0x30
-char _forward = 0xa0;//正転出力パワー
-char back    = 0x60;//逆転出力パワー
-char turnr;
-char turnl;
-char stop    = 0x80;//モーター止める
+static char _forward = 0xa0;//正転出力パワー
+static char back    = 0x60;//逆転出力パワー
+static char turnr;
+static char turnl;
+static char stop    = 0x80;//モーター止める
 
 
 //12V制御
@@ -30,7 +30,7 @@ AnalogIn pr2(A2);
 AnalogIn pr3(A3); 
 AnalogIn pr4(A4);
 AnalogIn pr5(A5);
-float wd = 0.0;//Wood distance　木材検知のしきい値
+static double wd = 0.0;//Wood distance　木材検知のしきい値
 
 //ボタン定義
 int Rx;            //ジョイコン　右　x軸
@@ -206,15 +206,23 @@ void receive_data(void){
 }
 
 ///////////////////！！！！！！！！！！！テストしろ！！！！！！！！！///////////////////////////
+/*
+   *フォトリフレクタ２つを使って木の柵を見つける
+   *両方のフォトリフレクタが反応しない→前進
+   *左のフォトリフレクタのみ反応→反時計回り回転
+   *右のフォトリフレクタのみ反応→時計回り回転
+   *両方のフォトリフレクタが反応→１を返し終了
+   *R2とL2を同時押しもしくはselectを押すと０を返し終了
+*/
 int iswood(AnalogIn pr_left, AnalogIn pr_right){
     //R2L2同時押しでキャンセル
     while(!(R2 && L2) && !select){
         if((pr_right*5)<wd && (pr_left*5)<wd){//前のフォトリフレクタがどちらも検知したら
             return 1;
-        }else if((pr_right*5)<wd){//右前だけ検知
-            send_all(stop, back, _forward, stop);//前方軸に時計回り
         }else if((pr_left*5)<wd){//左前だけ検知
             send_all(stop, _forward, back, stop);//前方軸に反時計回り
+        }else if((pr_right*5)<wd){//右前だけ検知
+            send_all(stop, back, _forward, stop);//前方軸に時計回り
         }else{
             send_all(_forward, _forward, _forward, _forward);//直進
         }
