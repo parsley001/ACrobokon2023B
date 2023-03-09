@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "PS3.h"
 #include "mbed_wait_api.h"
+#include <cstdio>
 
 
 //通信
@@ -47,38 +48,39 @@ void send_data(void);
 int main(){
     tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits, parity, stopbit)
 
-    int start=560, end=2200;//サーボPWM
-    servo1.pulsewidth_us(start);//サーボ初期位置
-    servo2.pulsewidth_us(start);
-    servo3.pulsewidth_us(start);
+    int servo_start=560, servo_end=2200;//サーボPWM
+    servo1.pulsewidth_us(servo_start);//サーボ初期位置
+    servo2.pulsewidth_us(servo_start);
+    servo3.pulsewidth_us(servo_start);
 
     while (true){
         get_data();
+        printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
         send_data();
 
 
 //フックを初期位置に戻す
         if(L2 && R2){
             if(button_maru){
-                servo2.pulsewidth_us(start);
+                servo2.pulsewidth_us(servo_start);
             }
             if(button_batu){
-                servo1.pulsewidth_us(start);
+                servo1.pulsewidth_us(servo_start);
             }
             if(button_sikaku){
-                servo3.pulsewidth_us(start);
+                servo3.pulsewidth_us(servo_start);
             }
         }//if
 //トレー設置
         else{
             if(button_maru){
-                servo2.pulsewidth_us(end);//サーボ位置変更
+                servo2.pulsewidth_us(servo_end);//サーボ位置変更
             }
             if(button_batu){
-                servo1.pulsewidth_us(end);
+                servo1.pulsewidth_us(servo_end);
             }
             if(button_sikaku){
-                servo3.pulsewidth_us(end);
+                servo3.pulsewidth_us(servo_end);
             }
         }//else
     }//while
@@ -118,21 +120,26 @@ void get_data(void){
 //もう一方のnucleoにデータ送信
 void send_data(void){
     // printf("maru:%d batu:%d\n",button_maru,button_batu);
-    if(select)         tuusin.write("0", 1); //else tuusin.write("000", 1);
-    if(start)          tuusin.write("1", 1); //else tuusin.write("001", 1);
+    if(select || start || button_sankaku || button_maru || button_batu || button_sikaku || button_ue || button_migi || button_sita || button_hidari || R1 || R2 || L1 || L2){
+        printf("hoge\n");
+        if(select)         tuusin.write("0", 1); //else tuusin.write("000", 1);
+        if(start)          tuusin.write("1", 1); //else tuusin.write("001", 1);
 
-    if(button_sankaku) tuusin.write("2", 1); //else tuusin.write("002", 1);
-    if(button_maru)    tuusin.write("3", 1); //else tuusin.write("003", 1);
-    if(button_batu)    tuusin.write("4", 1); //else tuusin.write("004", 1);
-    if(button_sikaku)  tuusin.write("5", 1); //else tuusin.write("f", 1);
+        if(button_sankaku) tuusin.write("2", 1); //else tuusin.write("002", 1);
+        if(button_maru)    tuusin.write("3", 1); //else tuusin.write("003", 1);
+        if(button_batu)    tuusin.write("4", 1); //else tuusin.write("004", 1);
+        if(button_sikaku)  tuusin.write("5", 1); //else tuusin.write("f", 1);
 
-    if(button_ue)      tuusin.write("6", 1); //else tuusin.write("g", 1);
-    if(button_migi)    tuusin.write("7", 1); //else tuusin.write("h", 1);
-    if(button_sita)    tuusin.write("8", 1); //else tuusin.write("i", 1);
-    if(button_hidari)  tuusin.write("9", 1); //else tuusin.write("j", 1);
+        if(button_ue)      tuusin.write("6", 1); //else tuusin.write("g", 1);
+        if(button_migi)    tuusin.write("7", 1); //else tuusin.write("h", 1);
+        if(button_sita)    tuusin.write("8", 1); //else tuusin.write("i", 1);
+        if(button_hidari)  tuusin.write("9", 1); //else tuusin.write("j", 1);
 
-    if(R1)             tuusin.write("a", 1); //else tuusin.write("k", 1);
-    if(R2)             tuusin.write("b", 1); //else tuusin.write("l", 1);
-    if(L1)             tuusin.write("c", 1); //else tuusin.write("m", 1);
-    if(L2)             tuusin.write("d", 1); //else tuusin.write("n", 1); 
+        if(R1)             tuusin.write("a", 1); //else tuusin.write("k", 1);
+        if(R2)             tuusin.write("b", 1); //else tuusin.write("l", 1);
+        if(L1)             tuusin.write("c", 1); //else tuusin.write("m", 1);
+        if(L2)             tuusin.write("d", 1); //else tuusin.write("n", 1); 
+    }else {
+        tuusin.write("e", 1);
+    }
 }

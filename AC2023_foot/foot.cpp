@@ -2,10 +2,10 @@
 #include "mbed_wait_api.h"
 
 //モーター
-#define MIGI_UE 0x14
-#define MIGI_SITA 0x22
-#define HIDARI_UE 0x40
-#define HIDARI_SITA 0x30
+#define MIGI_UE     0x26
+#define MIGI_SITA   0x24
+#define HIDARI_UE   0x22
+#define HIDARI_SITA 0x20
 static char _forward = 0xa0;//正転出力パワー
 static char back    = 0x60;//逆転出力パワー
 static char turnr;
@@ -78,7 +78,7 @@ int main(){
     while (true) {
         receive_data();//データ取得
 
-        printf("%d\n",select);
+        printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
         //緊急停止
         if(select){
             sig = 1;
@@ -92,7 +92,7 @@ int main(){
         moved_asimawari = 0;
 
 
-//エアシリンダー（タイヤ上げ用）
+/* //エアシリンダー（タイヤ上げ用）
         if(button_sankaku){
             if(iswood(pr0, pr1)){
                 air1 = 1;//前方輪上げ
@@ -110,7 +110,7 @@ int main(){
         }else {
             air1 = 0;
             air2 = 0;
-        }
+        } */
 
 
 //旋回
