@@ -5,13 +5,13 @@
 
 
 //通信
-PS3 ps3(A0, A1);//SBDBT
-UnbufferedSerial tuusin(D8, D2, 9600);//nucleoとの通信
+PS3 ps3(A0, A1);//SBDBT(PA_0),(PA_1)
+UnbufferedSerial tuusin(D8, D2, 9600);//nucleoとの通信(PA_9),(PA_10)
 
 //サーボモーター
-PwmOut servo1(D10);
-PwmOut servo2(D11);
-PwmOut servo3(D12);//こいつだけ逆向き
+PwmOut servo1(D10); //PB_6
+PwmOut servo2(D11); //PA_7
+PwmOut servo3(D12); //PA_6
 
 
 //ボタン定義

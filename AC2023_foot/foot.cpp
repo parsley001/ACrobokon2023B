@@ -16,20 +16,20 @@ static char stop    = 0x80;//モーター止める
 //12V制御
 DigitalOut sig(PC_12);//12v緊急停止
 DigitalIn  sta(PC_10);//12V検知
-DigitalOut air1(D11), air2(D12);//エア尻
-DigitalOut red(D6),green(D7),blue(D5);//LED
+DigitalOut air1(D12), air2(D11);//エア尻(PA_6),(PA_7)
+DigitalOut red(D6),green(D7),blue(D5);//LED(PB_10),(PA_8),(PB_4)
 
 //通信
-I2C i2c(D14,D15);//i2c通信
-UnbufferedSerial tuusin(D8, D2, 9600);//nucleo同士の通信
+I2C i2c(D14,D15);//i2c通信(PB_9),(PB_8)
+UnbufferedSerial tuusin(D8, D2, 9600);//nucleo同士の通信(PA_9),(PA_10)
 
 //フォトリフレクタ
-AnalogIn pr0(A0); 
-AnalogIn pr1(A1); 
-AnalogIn pr2(A2); 
-AnalogIn pr3(A3); 
-AnalogIn pr4(A4);
-AnalogIn pr5(A5);
+AnalogIn pr0(A0); //(PA_0)
+AnalogIn pr1(A1); //(PA_1)
+AnalogIn pr2(A2); //(PA_4)
+AnalogIn pr3(A3); //(PB_0)
+AnalogIn pr4(A4); //(PC_1)
+AnalogIn pr5(A5); //(PC_0)
 static double wd = 0.0;//Wood distance　木材検知のしきい値
 
 //ボタン定義
@@ -95,12 +95,12 @@ int main(){
 /* //エアシリンダー（タイヤ上げ用）
         if(button_sankaku){
             if(iswood(pr0, pr1)){
-                air1 = 1;//前方輪上げ
+                air1 = 0;//前方輪上げ
                 if(iswood(pr2, pr3)){
-                    air1 = 0;
-                    air2 = 1;
+                    air1 = 1;
+                    air2 = 0;
                     if (iswood(pr4, pr5)) {
-                        air2 = 0;
+                        air2 = 1;
                     }
                 }
             }
@@ -108,8 +108,8 @@ int main(){
 
 
         }else {
-            air1 = 0;
-            air2 = 0;
+            air1 = 1;
+            air2 = 1;
         } */
 
 
