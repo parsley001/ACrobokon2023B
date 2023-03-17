@@ -1,11 +1,12 @@
 #include "mbed.h"
 #include "mbed_wait_api.h"
+#include <cstdio>
 
 //モーター
 #define MIGI_UE     0x26
 #define MIGI_SITA   0x24
-#define HIDARI_UE   0x22
-#define HIDARI_SITA 0x20
+#define HIDARI_SITA 0x22
+#define HIDARI_UE   0x20
 static char _forward = 0xa0;//正転出力パワー
 static char back    = 0x60;//逆転出力パワー
 static char turnr;
@@ -30,7 +31,7 @@ AnalogIn pr2(A2); //(PA_4)
 AnalogIn pr3(A3); //(PB_0)
 AnalogIn pr4(A4); //(PC_1)
 AnalogIn pr5(A5); //(PC_0)
-static double wd = 0.0;//Wood distance　木材検知のしきい値
+static double wd = 4.8;//Wood distance　木材検知のしきい値
 
 //ボタン定義
 int Rx;            //ジョイコン　右　x軸
@@ -78,7 +79,8 @@ int main(){
     while (true) {
         receive_data();//データ取得
 
-        printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
+        //printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
+        printf("four %.3f   one %.3f   zero %.3f   three %.3f   two %.3f   five %.3f\n", pr4*5, pr1*5, pr0*5, pr3*5, pr2*5, pr5*5);
         //緊急停止
         if(select){
             sig = 1;
@@ -92,14 +94,25 @@ int main(){
         moved_asimawari = 0;
 
 
-/* //エアシリンダー（タイヤ上げ用）
+
+
+        // if(button_sankaku){
+        //     air1 = 1;
+        //     air2 = 1;
+        // }else {
+        //     air1 = 0;
+        //     air2 = 0;
+        // }
+
+
+//エアシリンダー（タイヤ上げ用）
         if(button_sankaku){
-            if(iswood(pr0, pr1)){
+            if(iswood(pr5, pr4)){
                 air1 = 0;//前方輪上げ
-                if(iswood(pr2, pr3)){
+                if(iswood(pr2, pr1)){
                     air1 = 1;
                     air2 = 0;
-                    if (iswood(pr4, pr5)) {
+                    if (iswood(pr3, pr0)) {
                         air2 = 1;
                     }
                 }
@@ -110,19 +123,19 @@ int main(){
         }else {
             air1 = 1;
             air2 = 1;
-        } */
+        }
 
 
 //旋回
         //機体左に旋回
         if(L1 && !moved_asimawari){
-            send_all(_forward, _forward, back, back);
+            send_all(256-_forward, _forward, back, 256-back);
             moved_asimawari = 1;
         }
 
         //機体右に旋回
         if(R1 && !moved_asimawari){
-            send_all(back, back, _forward, _forward);
+            send_all(256-back, back, _forward, 256-_forward);
             moved_asimawari = 1;
         }
 
@@ -130,25 +143,25 @@ int main(){
 //移動
         //前移動
         if(button_ue && !moved_asimawari){
-            send_all(_forward, _forward, _forward, _forward);
+            send_all(256-_forward, _forward, _forward, 256-_forward);
             moved_asimawari = 1;
         }
 
         //右移動
         if(button_migi && !moved_asimawari){
-            send_all(back, _forward, back, _forward);
+            send_all(256-back, _forward, back, 256-_forward);
             moved_asimawari = 1;
         }
 
         //左移動
         if(button_hidari && !moved_asimawari){
-            send_all(_forward, back, _forward, back);
+            send_all(256-_forward, back, _forward, 256-back);
             moved_asimawari = 1;
         }
 
         //後移動
         if(button_sita && !moved_asimawari){
-            send_all(back, back, back, back);
+            send_all(256-back, back, back, 256-back);
             moved_asimawari = 1;
         }
 
@@ -224,7 +237,7 @@ int iswood(AnalogIn pr_left, AnalogIn pr_right){
         }else if((pr_right*5)<wd){//右前だけ検知
             send_all(stop, back, _forward, stop);//前方軸に時計回り
         }else{
-            send_all(_forward, _forward, _forward, _forward);//直進
+            send_all(256-_forward, _forward, _forward, 256-_forward);//直進
         }
         receive_data();
     }//while

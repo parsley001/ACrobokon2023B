@@ -62,10 +62,10 @@ int main(){
 //フックを初期位置に戻す
         if(L2 && R2){
             if(button_maru){
-                servo2.pulsewidth_us(servo_start);
+                servo1.pulsewidth_us(servo_start);
             }
             if(button_batu){
-                servo1.pulsewidth_us(servo_start);
+                servo2.pulsewidth_us(servo_start);
             }
             if(button_sikaku){
                 servo3.pulsewidth_us(servo_start);
@@ -74,10 +74,10 @@ int main(){
 //トレー設置
         else{
             if(button_maru){
-                servo2.pulsewidth_us(servo_end);//サーボ位置変更
+                servo1.pulsewidth_us(servo_end);//サーボ位置変更
             }
             if(button_batu){
-                servo1.pulsewidth_us(servo_end);
+                servo2.pulsewidth_us(servo_end);
             }
             if(button_sikaku){
                 servo3.pulsewidth_us(servo_end);
