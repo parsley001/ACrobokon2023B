@@ -8,10 +8,10 @@
 #define HIDARI_SITA 0x22
 #define HIDARI_UE   0x20
 static char _forward = 0xa0;//正転出力パワー
-static char back    = 0x60;//逆転出力パワー
-static char turnr;
-static char turnl;
-static char stop    = 0x80;//モーター止める
+static char back     = 0x60;//逆転出力パワー
+static char turnfd   = 0x90;//旋回時の正転
+static char turnbk   = 0x70;//旋回時の逆転
+static char stop     = 0x80;//モーター止める
 
 
 //12V制御
@@ -56,6 +56,11 @@ bool button_sikaku;  // ☐
 
 bool select; //select
 bool start;  //start
+
+bool Lst_ue;         //Lスティック上
+bool Lst_migi;       //Lスティック右
+bool Lst_sita;       //Lスティック下
+bool Lst_hidari;     //Lスティック左
 //
 
 
@@ -142,25 +147,25 @@ int main(){
 
 //移動
         //前移動
-        if(button_ue && !moved_asimawari){
+        if(Lst_ue && !moved_asimawari){
             send_all(256-_forward, _forward, _forward, 256-_forward);
             moved_asimawari = 1;
         }
 
         //右移動
-        if(button_migi && !moved_asimawari){
+        if(Lst_migi && !moved_asimawari){
             send_all(256-back, _forward, back, 256-_forward);
             moved_asimawari = 1;
         }
 
         //左移動
-        if(button_hidari && !moved_asimawari){
+        if(Lst_hidari && !moved_asimawari){
             send_all(256-_forward, back, _forward, 256-back);
             moved_asimawari = 1;
         }
 
         //後移動
-        if(button_sita && !moved_asimawari){
+        if(Lst_sita && !moved_asimawari){
             send_all(256-back, back, back, 256-back);
             moved_asimawari = 1;
         }
@@ -214,6 +219,11 @@ void receive_data(void){
         if(data == 'b') R2 = 1;             else R2 = 0;
         if(data == 'c') L1 = 1;             else L1 = 0;
         if(data == 'd') L2 = 1;             else L2 = 0;
+
+        if(data == 'e') Lst_ue = 1;         else Lst_ue = 0;
+        if(data == 'f') Lst_migi = 1;       else Lst_migi = 0;
+        if(data == 'g') Lst_sita = 1;       else Lst_sita = 0;
+        if(data == 'h') Lst_hidari = 1;     else Lst_hidari = 0;
 
     }
 }

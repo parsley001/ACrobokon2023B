@@ -20,6 +20,14 @@ int Ry;            //ジョイコン　右　y軸
 int Lx;            //ジョイコン　左　x軸
 int Ly;            //ジョイコン　左　y軸
 
+bool Lst_ue;         //Lスティック上
+bool Lst_migi;       //Lスティック右
+bool Lst_sita;       //Lスティック下
+bool Lst_hidari;     //Lスティック左
+
+float Rangle;        // ジョイコン　右　角度
+float Langle;        // ジョイコン　左　角度
+
 bool R1;            //R1
 bool R2;            //R2
 bool L1;            //L1
@@ -48,7 +56,7 @@ void send_data(void);
 int main(){
     tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits, parity, stopbit)
 
-    int servo_start=560, servo_end=2200;//サーボPWM
+    int servo_start=560, servo_end=2200;//サーボの位置
     servo1.pulsewidth_us(servo_start);//サーボ初期位置
     servo2.pulsewidth_us(servo_start);
     servo3.pulsewidth_us(servo_start);
@@ -56,6 +64,22 @@ int main(){
     while (true){
         get_data();
         printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
+
+
+//スティック処理
+        if(Lx>60 || Lx<-60 || Ly>60 || Ly<-60){//スティックが最大限倒れている
+            if(Langle<45 && Langle>=-45)   Lst_migi = 1;   else Lst_migi = 0;
+            if(Langle<135 && Langle>=45)   Lst_ue = 1;     else Lst_ue = 0;
+            if(Langle<-135 && Langle>=135) Lst_hidari = 1; else Lst_hidari = 0;
+            if(Langle<-45 && Langle>=-135) Lst_sita = 1;   else Lst_sita = 0;
+        }else{
+            Lst_migi = 0;
+            Lst_ue = 0;
+            Lst_hidari = 0;
+            Lst_sita = 0;
+        }
+
+
         send_data();
 
 
@@ -85,7 +109,7 @@ int main(){
         }//else
     }//while
     return 0;
-}
+}//main
 
 
 
@@ -111,10 +135,14 @@ void get_data(void){
     button_sikaku = ps3.getButtonState(PS3::sikaku);
 
     //スティックの座標取得
-    // Rx = ps3.getRightJoystickXaxis();
-    // Ry = ps3.getRightJoystickYaxis();
-    // Lx = ps3.getLeftJoystickXaxis();
-    // Ly = ps3.getLeftJoystickYaxis();
+    Rx = ps3.getRightJoystickXaxis();
+    Ry = ps3.getRightJoystickYaxis();
+    Lx = ps3.getLeftJoystickXaxis();
+    Ly = ps3.getLeftJoystickYaxis();
+
+    //スティックの角度取得
+    Rangle = ps3.getRightJoystickAngle();
+    Langle = ps3.getLeftJoystickAngle();
 }
 
 //もう一方のnucleoにデータ送信
@@ -135,11 +163,18 @@ void send_data(void){
         if(button_sita)    tuusin.write("8", 1); //else tuusin.write("i", 1);
         if(button_hidari)  tuusin.write("9", 1); //else tuusin.write("j", 1);
 
+//順番変えると操作優先順位変わる？
         if(R1)             tuusin.write("a", 1); //else tuusin.write("k", 1);
         if(R2)             tuusin.write("b", 1); //else tuusin.write("l", 1);
         if(L1)             tuusin.write("c", 1); //else tuusin.write("m", 1);
         if(L2)             tuusin.write("d", 1); //else tuusin.write("n", 1); 
+
+        if(Lst_ue)         tuusin.write("e", 1);
+        if(Lst_migi)       tuusin.write("f", 1);
+        if(Lst_sita)       tuusin.write("g", 1);
+        if(Lst_sita)       tuusin.write("h", 1);
+
     }else {
-        tuusin.write("e", 1);
+        tuusin.write("z", 1);
     }
 }
