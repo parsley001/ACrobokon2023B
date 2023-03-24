@@ -63,14 +63,13 @@ int main(){
 
     while (true){
         get_data();
-        printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
 
 
 //スティック処理
         if(Lx>60 || Lx<-60 || Ly>60 || Ly<-60){//スティックが最大限倒れている
             if(Langle<45 && Langle>=-45)   Lst_migi = 1;   else Lst_migi = 0;
             if(Langle<135 && Langle>=45)   Lst_ue = 1;     else Lst_ue = 0;
-            if(Langle<-135 && Langle>=135) Lst_hidari = 1; else Lst_hidari = 0;
+            if(Langle<-135 || Langle>=135) Lst_hidari = 1; else Lst_hidari = 0;
             if(Langle<-45 && Langle>=-135) Lst_sita = 1;   else Lst_sita = 0;
         }else{
             Lst_migi = 0;
@@ -79,6 +78,8 @@ int main(){
             Lst_sita = 0;
         }
 
+
+        printf("%d %d  %d %d %d %d  %d %d %d %d  %7.2f %3d %3d  %d %d %d %d  %d %d %d %d\n", start, select,  button_sankaku, button_maru, button_batu, button_sikaku,  button_ue, button_migi, button_sita, button_hidari,  Langle, Lx, Ly,  Lst_ue, Lst_migi, Lst_sita, Lst_hidari,  R1, R2, L1, L2);
 
         send_data();
 
@@ -148,7 +149,7 @@ void get_data(void){
 //もう一方のnucleoにデータ送信
 void send_data(void){
     // printf("maru:%d batu:%d\n",button_maru,button_batu);
-    if(select || start || button_sankaku || button_maru || button_batu || button_sikaku || button_ue || button_migi || button_sita || button_hidari || R1 || R2 || L1 || L2){
+    if(select || start || button_sankaku || button_maru || button_batu || button_sikaku || button_ue || button_migi || button_sita || button_hidari || Lst_ue || Lst_migi || Lst_sita || Lst_hidari || R1 || R2 || L1 || L2){
         printf("hoge\n");
         if(select)         tuusin.write("0", 1); //else tuusin.write("000", 1);
         if(start)          tuusin.write("1", 1); //else tuusin.write("001", 1);
@@ -172,7 +173,7 @@ void send_data(void){
         if(Lst_ue)         tuusin.write("e", 1);
         if(Lst_migi)       tuusin.write("f", 1);
         if(Lst_sita)       tuusin.write("g", 1);
-        if(Lst_sita)       tuusin.write("h", 1);
+        if(Lst_hidari)     tuusin.write("h", 1);
 
     }else {
         tuusin.write("z", 1);

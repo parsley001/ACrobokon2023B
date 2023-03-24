@@ -81,10 +81,14 @@ int main(){
     tuusin.format(8, BufferedSerial::None, 1);//シリアル通信設定(bits, parity, stopbit)
     bool moved_asimawari;////////消す予定////////
 
+//エアシリンダー（タイヤ上げ用）
+    air1 = 1;
+    air2 = 1;
+
     while (true) {
         receive_data();//データ取得
 
-        //printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", start, select, button_sankaku, button_maru, button_batu, button_sikaku, button_ue, button_migi, button_sita, button_hidari, R1, R2, L1, L2);
+        // printf("%d %d  %d %d %d %d  %d %d %d %d  %d %d %d %d  %d %d %d %d\n", start, select,  button_sankaku, button_maru, button_batu, button_sikaku,  button_ue, button_migi, button_sita, button_hidari,  Lst_ue, Lst_migi, Lst_sita, Lst_hidari,  R1, R2, L1, L2);
         printf("four %.3f   one %.3f   zero %.3f   three %.3f   two %.3f   five %.3f\n", pr4*5, pr1*5, pr0*5, pr3*5, pr2*5, pr5*5);
         //緊急停止
         if(select){
@@ -99,18 +103,7 @@ int main(){
         moved_asimawari = 0;
 
 
-
-
-        // if(button_sankaku){
-        //     air1 = 1;
-        //     air2 = 1;
-        // }else {
-        //     air1 = 0;
-        //     air2 = 0;
-        // }
-
-
-//エアシリンダー（タイヤ上げ用）
+//自動障害物越えプログラム
         if(button_sankaku){
             if(iswood(pr5, pr4)){
                 air1 = 0;//前方輪上げ
@@ -122,26 +115,48 @@ int main(){
                     }
                 }
             }
-
-
-
-        }else {
-            air1 = 1;
-            air2 = 1;
+        }else if(L2 && R2){
+            if(button_ue){
+                air1 = 1;
+            }if(button_sita){
+                air2 = 1;
+            }
+        }else if(button_ue){
+            air1 = 0;
+        }else if(button_sita){
+            air2 = 0;
         }
+        
+        
+
+
 
 
 //旋回
         //機体左に旋回
         if(L1 && !moved_asimawari){
-            send_all(256-_forward, _forward, back, 256-back);
-            moved_asimawari = 1;
+            //つよい旋回
+            if(Lst_hidari){
+                send_all(256-_forward, _forward, back, 256-back);
+                moved_asimawari = 1;
+            //よわい旋回
+            }else{
+                send_all(256-turnfd, turnfd, turnbk, 256-turnbk);
+                moved_asimawari = 1;
+            }
         }
 
         //機体右に旋回
         if(R1 && !moved_asimawari){
-            send_all(256-back, back, _forward, 256-_forward);
-            moved_asimawari = 1;
+            //つよい旋回
+            if(Lst_migi){
+                send_all(256-back, back, _forward, 256-_forward);
+                moved_asimawari = 1;
+            //よわい旋回
+            }else{
+                send_all(256-turnbk, turnbk, turnfd, 256-turnfd);
+                moved_asimawari = 1;
+            }
         }
 
 
@@ -243,13 +258,14 @@ int iswood(AnalogIn pr_left, AnalogIn pr_right){
         if((pr_right*5)<wd && (pr_left*5)<wd){//前のフォトリフレクタがどちらも検知したら
             return 1;
         }else if((pr_left*5)<wd){//左前だけ検知
-            send_all(stop, _forward, back, stop);//前方軸に反時計回り
+            send_all(stop, turnfd, turnbk, stop);//前方軸に反時計回り
         }else if((pr_right*5)<wd){//右前だけ検知
-            send_all(stop, back, _forward, stop);//前方軸に時計回り
+            send_all(stop, turnbk, turnfd, stop);//前方軸に時計回り
         }else{
-            send_all(256-_forward, _forward, _forward, 256-_forward);//直進
+            send_all(256-turnfd, turnfd, turnfd, 256-turnfd);//直進
         }
         receive_data();
+        printf("four %.3f   one %.3f   zero %.3f   three %.3f   two %.3f   five %.3f\n", pr4*5, pr1*5, pr0*5, pr3*5, pr2*5, pr5*5);
     }//while
     return 0;
 }
