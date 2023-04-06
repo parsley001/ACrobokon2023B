@@ -7,8 +7,8 @@
 #define MIGI_SITA   0x24
 #define HIDARI_SITA 0x22
 #define HIDARI_UE   0x20
-static char _forward = 0xa0;//正転出力パワー
-static char back     = 0x60;//逆転出力パワー
+static char _forward = 0x98;//正転出力パワー
+static char back     = 0x68;//逆転出力パワー
 static char turnfd   = 0x90;//旋回時の正転
 static char turnbk   = 0x70;//旋回時の逆転
 static char stop     = 0x80;//モーター止める
@@ -157,22 +157,24 @@ int main(){
             //よわい旋回
             send_all(256-turnfd, turnfd, turnbk, 256-turnbk);
             moved_asimawari = 1;
-        }else if(Rst_hidari){
-            //つよい旋回
-            send_all(256-_forward, _forward, back, 256-back);
-            moved_asimawari = 1;
         }
+        //else if(Rst_hidari){
+        //    //つよい旋回
+        //    send_all(256-_forward, _forward, back, 256-back);
+        //    moved_asimawari = 1;
+        //}
 
         //機体右に旋回
         if(R1 && !moved_asimawari){
             //よわい旋回
             send_all(256-turnbk, turnbk, turnfd, 256-turnfd);
             moved_asimawari = 1;
-        }else if(Rst_migi){
-            //つよい旋回
-            send_all(256-back, back, _forward, 256-_forward);
-            moved_asimawari = 1;
         }
+        //else if(Rst_migi){
+        //    //つよい旋回
+        //    send_all(256-back, back, _forward, 256-_forward);
+        //    moved_asimawari = 1;
+        //}
         
 
 
